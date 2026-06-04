@@ -1,0 +1,31 @@
+# 模型权重
+models/Qwen2.5-7B-Instruct
+models/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# 虚拟环境
+env/
+venv/
+.conda/
+
+# 实验结果
+data/results/
+
+# 日志
+logs/
+
+# Jupyter Notebook 检查点
+.ipynb_checkpoints/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
