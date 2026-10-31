@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llmbench"
+version = "0.2.0"
+description = "A reproducible benchmarking harness for LLM serving backends (vLLM vs. HuggingFace) with an interactive dashboard."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "tochikoma777" }]
+keywords = ["llm", "inference", "benchmark", "vllm", "paged-attention", "continuous-batching"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: System :: Benchmark",
+]
+dependencies = [
+  "numpy>=1.23",
+  "pandas>=2.0",
+  "PyYAML>=5.4",
+  "matplotlib>=3.5",
+  "rich>=12.0",
+]
+
+[project.optional-dependencies]
+gpu = ["torch>=2.1", "transformers>=4.40", "accelerate>=0.26", "vllm>=0.5.0", "modelscope>=1.15"]
+viz = ["plotly>=5.15", "streamlit>=1.30", "kaleido>=0.2.1"]
+telemetry = ["pynvml>=11.5"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.4", "black>=24.0", "mypy>=1.8", "types-PyYAML"]
+all = ["llmbench[gpu,viz,telemetry,dev]"]
+
+[project.scripts]
+llmbench = "llmbench.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/tochikoma777/llm-inference-benchmark"
+Issues = "https://github.com/tochikoma777/llm-inference-benchmark/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = ["gpu: requires a CUDA GPU", "slow: long running test"]
+
+[tool.coverage.run]
+source = ["llmbench"]
+omit = ["*/dashboard/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RET"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/llmbench/cli.py" = ["C901"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_unused_ignores = false
+ignore_missing_imports = true
+files = ["src/llmbench"]

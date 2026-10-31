@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install tooling
+        run: |
+          python -m pip install -U pip
+          pip install ruff black mypy types-PyYAML
+          pip install -e ".[viz]"
+      - name: Ruff
+        run: ruff check src tests
+      - name: Black
+        run: black --check src tests
+      - name: Mypy
+        run: mypy src/llmbench
+
+  test:
+    name: Tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[viz,dev]"
+      - name: Run tests
+        run: pytest -q --cov=llmbench --cov-report=term-missing
+      - name: Upload coverage
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: .coverage
+          if-no-files-found: ignore
+
+  pipeline:
+    name: End-to-end pipeline (mock backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[viz]"
+      - name: Run smoke benchmark
+        run: |
+          llmbench run -c config/smoke.yaml
+          llmbench report --latest --out-dir reports/ci --lang en
+      - name: Assert artefacts exist
+        run: |
+          test -f reports/ci/benchmark_report.generated.md
+          test -n "$(ls reports/ci/benchmark_report_*.html)"
+          test "$(ls reports/ci/figures/*.png | wc -l)" -ge 5
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: |
+            reports/ci/**/*.html
+            reports/ci/**/*.md
+            reports/ci/figures/*.png

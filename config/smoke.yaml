@@ -1,0 +1,46 @@
+# Fast smoke test — one minute, no GPU. Used by CI and `make check`.
+#   llmbench run -c config/smoke.yaml
+
+name: smoke
+description: Minimal end-to-end smoke run (mock backend).
+seed: 1
+tags: [ci, smoke]
+
+model:
+  path: null
+
+backend:
+  name: mock
+  serving_mode: continuous_batch
+
+workload:
+  num_requests: 6
+  max_new_tokens: 32
+  warmup_runs: 0
+  arrival:
+    mode: burst
+
+monitor:
+  enabled: false
+
+mock:
+  time_scale: 0.002
+  gpu_profile: rtx3090
+  noise: 0.0
+  seed: 1
+
+sim:
+  num_requests: 40
+  policies: [fcfs, sjf]
+  max_num_seqs: 4
+
+scenarios:
+  single: true
+  concurrency: true
+  memory: true
+  prefix_cache: true
+  scheduler: true
+  concurrency_levels: [1, 4]
+  prompt_lengths: [128, 512]
+  output_lengths: [1, 32]
+  repeats: 1

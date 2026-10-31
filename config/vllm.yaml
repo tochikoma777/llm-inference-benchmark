@@ -1,0 +1,49 @@
+# vLLM — continuous batching, PagedAttention, prefix caching.
+#
+#   llmbench run -c config/vllm.yaml --model-path /models/Qwen2.5-7B-Instruct
+#
+# Requires the GPU extras: pip install -r requirements-gpu.txt
+
+name: qwen7b-vllm
+description: Qwen2.5-7B-Instruct served by vLLM with continuous batching.
+seed: 42
+tags: [reference, vllm]
+
+model:
+  path: null                 # override with --model-path / LLMBENCH_MODEL_PATH
+  dtype: float16
+  max_model_len: 8192
+  trust_remote_code: true
+
+backend:
+  name: vllm
+  serving_mode: continuous_batch   # stream per request → real TTFT under scheduling
+  tensor_parallel_size: 1
+  gpu_memory_utilization: 0.85
+  enable_prefix_caching: false     # the prefix_cache scenario toggles this itself
+  max_num_seqs: 256
+
+workload:
+  num_requests: 64
+  max_new_tokens: 128
+  temperature: 0.7
+  top_p: 0.9
+  warmup_runs: 2
+  arrival:
+    mode: burst
+    rate_rps: 8.0
+
+monitor:
+  enabled: true
+  interval_ms: 100
+
+scenarios:
+  single: true
+  concurrency: true
+  memory: true
+  prefix_cache: true
+  scheduler: true
+  concurrency_levels: [1, 2, 4, 8]
+  prompt_lengths: [256, 512, 1024, 2048]
+  output_lengths: [1, 128, 256]
+  repeats: 2

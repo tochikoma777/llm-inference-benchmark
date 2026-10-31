@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------------
+# Default configuration — runs anywhere, no GPU required.
+#
+#   llmbench run                       # uses this file
+#   llmbench run -c config/vllm.yaml   # real vLLM engine
+#   llmbench run -c config/hf.yaml     # HuggingFace reference engine
+#
+# Every value here can be overridden on the command line, e.g.
+#   llmbench run --set backend.name=vllm --set scenarios.repeats=3
+# ---------------------------------------------------------------------------
+
+name: demo-mock
+description: >-
+  Out-of-the-box demo. Uses the analytic mock backend so the full pipeline
+  (load generation → telemetry → aggregation → dashboard) runs in seconds on
+  any machine. Results are clearly tagged as simulated.
+seed: 42
+tags: [demo, simulated]
+
+model:
+  # Point this at a local checkpoint, or export LLMBENCH_MODEL_PATH.
+  # `llmbench fetch-model --model qwen/Qwen2.5-7B-Instruct` can download one.
+  path: null
+  dtype: float16
+  max_model_len: 8192
+  trust_remote_code: true
+  quantization: null
+
+backend:
+  name: mock                 # mock | naive | vllm
+  serving_mode: auto         # auto resolves to continuous_batch for mock/vllm,
+                             # static_batch for naive
+  tensor_parallel_size: 1
+  gpu_memory_utilization: 0.85
+  enable_prefix_caching: false
+  max_num_seqs: 256
+  max_batch_size: 16
+  enforce_eager: false
+
+workload:
+  dataset: null              # null → procedural short/long mixture
+  num_requests: 32
+  max_new_tokens: 128
+  temperature: 0.7
+  top_p: 0.9
+  warmup_runs: 1
+  arrival:
+    mode: burst              # burst | constant | poisson
+    rate_rps: 8.0
+
+monitor:
+  enabled: true
+  interval_ms: 100
+  device_index: 0
+
+mock:
+  time_scale: 0.02           # 1 s simulated → 20 ms wall clock
+  gpu_profile: rtx3090       # rtx3090 | a100 | h100 | cpu
+  noise: 0.03
+  seed: 7
+
+sim:
+  num_requests: 120
+  short_ratio: 0.7
+  arrival_mean_ms: 1000.0
+  seed: 42
+  policies: [fcfs, sjf, priority, sjf_aging]
+  max_num_seqs: 12
+  block_size: 16
+  kv_pool_mb: 20000
+  kv_mb_per_token: 0.5
+  prefill_tok_per_ms: 2.5
+  decode_step_ms: 20.0
+  decode_batch_factor: 0.12
+  sjf_aging_tau_ms: 2000
+
+scenarios:
+  single: true
+  concurrency: true
+  memory: true
+  prefix_cache: true
+  scheduler: true
+  concurrency_levels: [1, 2, 4, 8]
+  prompt_lengths: [256, 512, 1024, 2048]
+  output_lengths: [1, 128, 256]
+  repeats: 1
+
+output:
+  dir: null                  # null → data/results/
+  tag: null
+  save_text: false

@@ -1,0 +1,49 @@
+# HuggingFace Transformers — the unoptimised reference implementation.
+#
+#   llmbench run -c config/hf.yaml --model-path /models/Qwen2.5-7B-Instruct \
+#                --set backend.serving_mode=static_batch
+#
+# serving_mode=per_request  → one forward pass per request (worst case)
+# serving_mode=static_batch → pad to longest prompt, one padded batch
+
+name: qwen7b-hf-naive
+description: HuggingFace Transformers baseline (static batching).
+seed: 42
+tags: [reference, baseline, huggingface]
+
+model:
+  path: null
+  dtype: float16
+  max_model_len: 8192
+  trust_remote_code: true
+
+backend:
+  name: naive
+  serving_mode: static_batch
+  max_batch_size: 8
+  device: cuda
+
+workload:
+  num_requests: 64
+  max_new_tokens: 128
+  temperature: 0.7
+  top_p: 0.9
+  warmup_runs: 2
+  arrival:
+    mode: burst
+    rate_rps: 8.0
+
+monitor:
+  enabled: true
+  interval_ms: 100
+
+scenarios:
+  single: true
+  concurrency: true
+  memory: true
+  prefix_cache: false        # unsupported by the HF backend
+  scheduler: true
+  concurrency_levels: [1, 2, 4, 8]
+  prompt_lengths: [256, 512, 1024, 2048]
+  output_lengths: [1, 128, 256]
+  repeats: 2

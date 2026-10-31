@@ -1,31 +1,70 @@
-# 模型权重
-models/Qwen2.5-7B-Instruct
-models/
-
-# Python 缓存
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*.so
 *.egg-info/
-
-# 虚拟环境
-env/
+dist/
+build/
+.eggs/
+.venv/
 venv/
+env/
 .conda/
 
-# 实验结果
-data/results/
-
-# 日志
-logs/
-
-# Jupyter Notebook 检查点
+# ---------------------------------------------------------------------------
+# Tooling caches
+# ---------------------------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
 .ipynb_checkpoints/
 
-# 系统文件
+# ---------------------------------------------------------------------------
+# Local configuration & secrets
+# ---------------------------------------------------------------------------
+.env
+*.local.yaml
+config/local.yaml
+
+# ---------------------------------------------------------------------------
+# Models (never commit weights)
+# ---------------------------------------------------------------------------
+models/
+*.safetensors
+*.bin
+*.gguf
+
+# ---------------------------------------------------------------------------
+# Generated artifacts
+#   Synthetic/CI results are ignored by default. If you publish a benchmark
+#   run (like the reference results in reports/), copy the JSON into
+#   `data/results/published/` and remove the ignore rule for that path.
+# ---------------------------------------------------------------------------
+data/results/*
+!data/results/.gitkeep
+!data/results/published/
+logs/
+
+# Generated figures/reports are reproducible artefacts:
+#   make demo  →  reports/demo/
+# Keep the demo's PNG + Markdown (small, useful in docs), ignore the
+# multi-megabyte self-contained HTML and its sidecar JSON.
+reports/figures/*
+!reports/figures/.gitkeep
+reports/generated/*
+reports/demo/*.html
+reports/demo/*.json
+reports/ci/
+
+# ---------------------------------------------------------------------------
+# OS / IDE
+# ---------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
-
-# IDE
 .vscode/
 .idea/
