@@ -55,6 +55,12 @@ CI 会重复执行这些命令。本地全绿再开 PR，能省一轮来回。
 
 改了 CLI、配置项或产物路径，请同步更新 README 对应段落——文档过期比没有文档更糟。
 
+文档分工与「什么改动该更新哪份文档」的约定见 [docs/README.md](docs/README.md)。
+其中两条硬性要求：
+
+- 新的架构决策 → `docs/decisions.md` 追加编号条目，**不要改写历史条目**；
+- 新发现的旧版本缺陷 → `docs/audit-v0.1.md` 追加，并标注「审计后补」。
+
 ## 提交信息
 
 沿用 [Conventional Commits](https://www.conventionalcommits.org/)：

@@ -20,6 +20,11 @@ llmbench run -c config/smoke.yaml && llmbench report --latest --open
 没有 GPU？上面这条命令照样能跑通 —— 内置的**解析式模拟后端**会在几秒内生成一整套
 结果、图表和可交互报告，用来验证流水线与演示结论。
 
+> **当前验证状态**：整条流水线已用模拟后端完成端到端验证；真实 vLLM / HuggingFace
+> 代码路径已实现并做了版本回退，但**尚未在 24GB GPU 上跑过**。
+> 验收清单见 [docs/roadmap.md](docs/roadmap.md#3-gpu-验收清单)。
+> 引用任何数字前，请先确认对应 run 的 `metadata.json` 中 `system.mock` 的值。
+
 ---
 
 ## 目录
@@ -35,6 +40,7 @@ llmbench run -c config/smoke.yaml && llmbench report --latest --open
 - [如何接入新的推理后端](#如何接入新的推理后端)
 - [测量方法学](#测量方法学)
 - [已知限制](#已知限制)
+- [文档与可追溯性](#文档与可追溯性)
 - [开发](#开发)
 
 ---
@@ -328,6 +334,33 @@ register_backend("sglang")(lambda: SGLangBackend)
 - 调度模拟器不建模 kernel 级细节（chunked prefill、投机解码、张量并行通信开销）。
 - 显存采样是轮询式的，短于采样间隔的峰值可能被漏掉；对比趋势可靠，绝对值有少量误差。
 - 前缀缓存的收益强依赖于共享前缀长度，本项目固定使用同一篇长文档，不代表所有场景。
+
+---
+
+## 文档与可追溯性
+
+这个项目的每个结论都能追到「哪一行代码 / 哪一次提交 / 哪一条测量」。
+文档按职责拆分，入口在 [docs/README.md](docs/README.md)。
+
+| 文档 | 内容 |
+|---|---|
+| [docs/audit-v0.1.md](docs/audit-v0.1.md) | **v0.1 审计**：25 个问题（P0/P1/P2 分级），每条含证据 `文件:行号 @ v0.1.0`、影响与处理方式 |
+| [docs/decisions.md](docs/decisions.md) | **决策记录（ADR）**：15 个架构决策，每条含选项、理由、代价、验证方式与关联提交 |
+| [docs/roadmap.md](docs/roadmap.md) | **路线图**：当前状态、GPU 验收清单、后续优化优先级、发布流程、风险登记 |
+| [docs/methodology.md](docs/methodology.md) | **测量方法学**：TTFT / TPOT / 吞吐 / 显存的口径与失效条件，模拟后端的标定方法 |
+| [docs/architecture.md](docs/architecture.md) | **架构说明**：分层、依赖方向、关键设计决策、扩展点 |
+| [docs/reference-run-rtx3090.md](docs/reference-run-rtx3090.md) | **v0.1 实测存档**：最早那批 3090 数据（mock 后端即以此为标定依据） |
+
+**版本与溯源**
+
+```bash
+git tag                       # v0.1.0（原始版本） / v0.2.0（本次重构）
+git show v0.1.0:src/scheduler_sim/base_scheduler.py | nl -ba | sed -n '138,146p'
+```
+
+审计文档里所有 `文件:行号` 的引用基线是 `v0.1.0`（提交 `7b047a2`），
+可以随时用上面这条命令复核。决策记录里的每条都标注了落地提交，
+`git log --oneline` 可以直接对上。
 
 ---
 

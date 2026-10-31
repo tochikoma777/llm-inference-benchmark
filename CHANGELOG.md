@@ -46,7 +46,17 @@
 
 - 新增 100+ 个 pytest 用例，覆盖统计、配置、存储、聚合、调度器、负载生成、报告、CLI 与仪表盘。
 - 引入 ruff + black + mypy 配置，以及 GitHub Actions CI（多 Python 版本 + 端到端冒烟）。
-- 补充 LICENSE、CONTRIBUTING、CHANGELOG 与 `docs/` 方法学文档。
+- 补充 LICENSE、CONTRIBUTING、CHANGELOG。
+
+### 文档与溯源
+
+- `docs/audit-v0.1.md`：v0.1 全量审计，25 个问题按 P0/P1/P2 分级，每条带
+  `文件:行号 @ v0.1.0` 证据、影响分析与 v0.2 处理方式。
+- `docs/decisions.md`：15 条 ADR（背景 / 选项 / 决策 / 理由 / 代价 / 验证 / 关联提交），
+  附开发过程时间线，可从任意决策回溯到具体提交。
+- `docs/roadmap.md`：当前验证状态、GPU 验收清单（可执行 + 通过标准）、
+  后续优化优先级、发布与协作流程、风险登记。
+- `docs/README.md`：文档索引、阅读路径与维护约定。
 
 ### 破坏性变更
 
