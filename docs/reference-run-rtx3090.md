@@ -4,6 +4,9 @@
 > 文中提到的目录结构与脚本（`src/benchmarks/*.py`、`data/results/*.json`）已在 v0.2
 > 重构中替换为 `llmbench` 包与按运行分目录的结果存储。数据本身仍然有效，
 > 并且是当前 mock 后端标定的依据（见 [methodology.md](methodology.md)）。
+>
+> 文中的图表是 **v0.1 原样输出**（由当时存在缺陷的脚本生成，见
+> [审计](audit-v0.1.md)），保留于此仅为存档对照，**不应作为 v0.2 的图表样例**。
 
 > **作者**：[tochikoma777]  
 > **时间**：2026 年 6 月  
@@ -99,10 +102,10 @@ vLLM 通过两项关键创新解决上述问题：
 - vLLM 的 Continuous Batching 实现了接近线性扩展（6.8× @ 8 并发），GPU 利用率稳定在 89%~92%，动态插入新请求填补了空闲槽位。  
 
 **图 1：Throughput vs Concurrency**  
-![02_throughput_vs_concurrency](figures/02_throughput_vs_concurrency.png)
+![02_throughput_vs_concurrency](figures/v0.1/02_throughput_vs_concurrency.png)
 
 **图 2：GPU Utilization Comparison**  
-![04_gpu_utilization](figures/04_gpu_utilization.png)
+![04_gpu_utilization](figures/v0.1/04_gpu_utilization.png)
 
 ### 4.2 显存效率：PagedAttention 的功劳
 
@@ -119,7 +122,7 @@ vLLM 通过两项关键创新解决上述问题：
 Naive 后端按最大序列长度预分配连续的 KV Cache，序列变长时显存线性增长（+1922 MB）。vLLM 的 PagedAttention 以 block 为单位动态分配，增长仅 +388 MB，且内存池复用率极高。这证明了分页管理在可变长度序列场景下的压倒性优势。
 
 **图 3：GPU Memory vs Sequence Length**  
-![03_memory_vs_sequence_length](figures/03_memory_vs_sequence_length.png)
+![03_memory_vs_sequence_length](figures/v0.1/03_memory_vs_sequence_length.png)
 
 ### 4.3 Prefix Caching：多轮对话的加速器
 
@@ -136,7 +139,7 @@ Naive 后端按最大序列长度预分配连续的 KV Cache，序列变长时�
 总时间加速比仅为 1.25×，因为 decode 时间占主导（128 tokens）。然而，**TTFT 维度加速达 1.75×**，说明 Prefix Caching 主要节省了 prefill 阶段。在生产环境的长系统提示或多轮对话中，该优化可显著降低用户感知延迟。
 
 **图 4：Prefix Caching Speedup**  
-![05_prefix_cache](figures/05_prefix_cache.png)
+![05_prefix_cache](figures/v0.1/05_prefix_cache.png)
 
 ### 4.4 调度策略：FCFS vs SJF 的经典权衡
 
@@ -155,7 +158,7 @@ Naive 后端按最大序列长度预分配连续的 KV Cache，序列变长时�
 SJF 将短请求的 TTFT 从 6.5s 骤降至 0.1s（**60 倍差距**），但代价是长请求的 P99 延迟上升。这正是 vLLM 默认采用 FCFS 的原因——在服务公平性与峰值效率间，生产环境必须优先保证尾延迟可控。芯片设计中的仲裁器也面临完全相同的权衡：高优先级事务不能无限期阻塞低优先级事务。
 
 **图 5：Scheduler Comparison**  
-![07_scheduler_comparison](figures/07_scheduler_comparison.png)
+![07_scheduler_comparison](figures/v0.1/07_scheduler_comparison.png)
 
 ---
 
