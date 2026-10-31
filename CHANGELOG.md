@@ -2,6 +2,23 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.1] — 2026-10-31
+
+补丁版本：仅测试与文档修正，**无运行时行为变化**，数据格式不变（schema v2）。
+
+### 修复
+
+- 测试不再跨模块导入 `tests.conftest`。该写法只在 `python -m pytest` 下成立
+  （其将 cwd 加入 `sys.path`），CI 使用的 `pytest` 命令会抛
+  `ModuleNotFoundError: No module named 'tests'`。改为 `make_run` 工厂 fixture。
+- HTML 报告的版本徽标改为读取 `llmbench.__version__`，避免与 `pyproject.toml` 脱节。
+
+### 新增
+
+- `CODEBUDDY.md`：仓库级协作说明（当前状态、命令、约定、陷阱、下一步），
+  供新会话或新维护者快速接手。
+- `docs/README.md` 的阅读路径中补充「接手 / 继续开发」入口。
+
 ## [0.2.0] — 2026-10-31
 
 一次彻底的重构。核心动机：把「能跑出数字的脚本」升级为「结论可信、可复现、

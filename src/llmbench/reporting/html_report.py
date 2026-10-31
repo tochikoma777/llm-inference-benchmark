@@ -21,6 +21,7 @@ from typing import Any
 
 import pandas as pd
 
+from .. import __version__
 from ..core.paths import reports_dir
 from ..reporting.analysis import Analysis
 from ..viz import plotly_charts as charts
@@ -468,7 +469,7 @@ def build_html_report(
 <body>
 <div class="wrap">
   <header class="hero">
-    <span class="eyebrow">LLMBench · v0.2</span>
+    <span class="eyebrow">LLMBench · v{__version__}</span>
     <h1>{html.escape(t['title'])}</h1>
     <p class="lede">{html.escape(t['subtitle'])}</p>
     <div class="chips">{''.join(chips)}</div>
