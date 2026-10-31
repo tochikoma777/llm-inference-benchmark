@@ -68,16 +68,13 @@ def test_memory_and_prefix_frames(synthetic_store):
     assert len(analysis.prefix_frame()) == 6
 
 
-def test_repeated_runs_are_averaged_not_summed(synthetic_store):
+def test_repeated_runs_are_averaged_not_summed(synthetic_store, make_run):
     """Two identical runs must not double the reported throughput."""
-    from tests.conftest import write_synthetic_run
-
     store = ResultStore(synthetic_store)
     before = Analysis.load(store).concurrency_frame()
     baseline = before[before["concurrency"] == 4]["throughput_tok_s"].iloc[0]
 
-    write_synthetic_run(
-        store.root,
+    make_run(
         run_id="ccc-vllm-repeat",
         backend="vllm",
         serving_mode="continuous_batch",

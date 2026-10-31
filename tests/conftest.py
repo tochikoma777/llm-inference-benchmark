@@ -162,6 +162,23 @@ def write_synthetic_run(
 
 
 @pytest.fixture()
+def make_run(results_dir):
+    """Factory fixture: write an extra synthetic run into the temp store.
+
+    Exposed as a fixture rather than a helper function so tests never import
+    from ``tests.conftest`` — that only works when the repository root happens
+    to be on ``sys.path`` (i.e. with ``python -m pytest``, not with the
+    ``pytest`` console script used in CI).
+    """
+
+    def _make(**kwargs) -> Path:
+        kwargs.setdefault("run_id", "extra-run")
+        return write_synthetic_run(results_dir, **kwargs)
+
+    return _make
+
+
+@pytest.fixture()
 def synthetic_store(results_dir) -> Path:
     write_synthetic_run(
         results_dir,
