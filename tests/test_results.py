@@ -163,6 +163,18 @@ def test_store_load_all_returns_dataframe(synthetic_store):
     assert set(df["run_id"].unique()) == {"aaa-vllm", "bbb-naive"}
 
 
+def test_store_discovers_grouped_runs(tmp_path):
+    group = tmp_path / "demo"
+    group.mkdir()
+    meta = RunMetadata(run_id="grouped", name="grouped")
+    writer = RunWriter(meta, directory=group / "grouped")
+    writer.add(_record())
+    writer.write()
+
+    store = ResultStore(tmp_path)
+    assert [info.run_id for info in store.runs()] == ["grouped"]
+
+
 def test_store_load_all_empty(tmp_path):
     store = ResultStore(tmp_path)
     df, infos = store.load_all()

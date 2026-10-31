@@ -263,7 +263,7 @@ llm-inference-benchmark/
 │   ├── viz/                    # 主题、Plotly、matplotlib
 │   ├── dashboard/              # Streamlit 应用
 │   └── cli.py                  # llmbench 命令行
-├── tests/                      # pytest（119 个用例）
+├── tests/                      # pytest（120 个用例）
 ├── scripts/                    # demo / GPU 运行 / 列实验
 ├── data/prompts/               # 数据集
 ├── reports/                    # 报告与图表

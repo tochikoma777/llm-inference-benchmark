@@ -355,9 +355,20 @@ class ResultStore:
 
     # -- discovery -------------------------------------------------------
     def run_dirs(self) -> list[Path]:
+        """Directories containing a ``metadata.json``.
+
+        Both ``<root>/<run>/`` and one level of grouping
+        (``<root>/<group>/<run>/``, e.g. the demo suite) are discovered, so a
+        grouped run is never invisible to ``llmbench runs`` or the dashboard.
+        """
         if not self.root.exists():
             return []
-        dirs = [p for p in self.root.iterdir() if p.is_dir() and (p / "metadata.json").exists()]
+        dirs = {
+            marker.parent
+            for pattern in ("*/metadata.json", "*/*/metadata.json")
+            for marker in self.root.glob(pattern)
+            if marker.is_file()
+        }
         return sorted(dirs, key=lambda p: p.stat().st_mtime, reverse=True)
 
     def runs(self) -> list[RunInfo]:
