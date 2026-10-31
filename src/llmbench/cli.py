@@ -82,6 +82,17 @@ def _table(title: str, columns: list[str], rows: list[list]) -> None:
         print(" | ".join(str(cell) for cell in row))
 
 
+def _fmt_concurrency(value: Any) -> str:
+    """Render 4.0 as ``4`` so CLI tables stay tidy."""
+    if value is None:
+        return "—"
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return str(int(number)) if number.is_integer() else f"{number:g}"
+
+
 def _fmt(value: Any, digits: int = 1, suffix: str = "") -> str:
     if value is None:
         return "—"
@@ -161,12 +172,17 @@ def cmd_run(args: argparse.Namespace) -> int:
                 [
                     "Peak throughput",
                     f"{_fmt(kpis.get('peak_throughput_tok_s'), 0)} tok/s",
-                    f"{kpis.get('peak_throughput_backend','—')} @ c={kpis.get('peak_concurrency','—')}",
+                    f"{kpis.get('peak_throughput_backend', '—')} @ "
+                    f"c={_fmt_concurrency(kpis.get('peak_concurrency'))}",
                 ],
                 [
                     "Throughput speed-up",
                     f"{_fmt(kpis.get('throughput_speedup'), 2)}×",
-                    f"vs naive @ c={kpis.get('throughput_speedup_at','—')}",
+                    (
+                        f"{kpis.get('speedup_fastest', '—')} vs {kpis.get('speedup_baseline', '—')}"
+                        if kpis.get("speedup_baseline")
+                        else "single configuration"
+                    ),
                 ],
                 ["Best TTFT p95", f"{_fmt(kpis.get('best_ttft_p95_ms'), 0)} ms", ""],
                 [
